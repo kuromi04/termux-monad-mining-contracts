@@ -10091,6 +10091,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "monad-mining-registry@workspace:."
   dependencies:
+    "@next/swc-wasm-nodejs": ~15.2.3
     husky: ~9.1.6
     lint-staged: ~13.2.2
   languageName: unknown
