@@ -1,0 +1,70 @@
+change: qp-dashboard
+status: implemented
+phases:
+  - id: 1
+    name: Foundation / Infrastructure
+    status: completed
+    tasks:
+      - id: 1.1
+        description: Add "/dashboard" route linking to "/dashboard" in Header menuLinks.
+        status: completed
+      - id: 1.2
+        description: Create dashboard directory and page.tsx component with Scaffold-ETH 2 hooks structure.
+        status: completed
+  - id: 2
+    name: Core Implementation
+    status: completed
+    tasks:
+      - id: 2.1
+        description: Implement client-side role checks for whitelistedQP and owner.
+        status: completed
+      - id: 2.2
+        description: Implement Access Denied card component for non-authorized users.
+        status: completed
+      - id: 2.3
+        description: Whitelist profile status card for authorized QPs with status badge.
+        status: completed
+      - id: 2.4
+        description: Client-side loop iterating from 1 to nextTokenId to query certificates.
+        status: completed
+      - id: 2.5
+        description: Display count of signed certificates.
+        status: completed
+      - id: 2.6
+        description: Certificate Registration Form with validations for tonnage, cut-off, title, and geohash.
+        status: completed
+      - id: 2.7
+        description: Resource Escalator Table showing signed certificates and category steps with a one-click button.
+        status: completed
+      - id: 2.8
+        description: Owner-only Admin Panel using AddressInput to whitelist QPs.
+        status: completed
+  - id: 3
+    name: Wiring / Integration
+    status: completed
+    tasks:
+      - id: 3.1
+        description: Simplify home page (page.tsx) to read-only search card.
+        status: completed
+      - id: 3.2
+        description: Apply premium obsidian glassmorphism UI styling.
+        status: completed
+  - id: 4
+    name: Verification / Testing
+    status: pending
+    tasks:
+      - id: 4.1
+        description: Manual verification of active menu class highlighting.
+        status: pending
+      - id: 4.2
+        description: Access control verification (non-QP vs QP vs Owner views).
+        status: pending
+      - id: 4.3
+        description: Form validations tests.
+        status: pending
+      - id: 4.4
+        description: End-to-end flow execution (whitelist -> register -> advance).
+        status: pending
+notes:
+  - Core codebase implementation for Phases 1-3 is complete.
+  - Node dependencies installation timed out due to Termux glibc/sandbox environment constraints. Testing/verification will proceed with manual validation, or through local development setup by the user.

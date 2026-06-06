@@ -2,26 +2,15 @@
 
 import { useState } from "react";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
+import Link from "next/link";
 import { Address } from "~~/components/scaffold-eth";
-import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 const STANDARDS = ["NI 43-101 (Canadá)", "ECRR 2018 (Colombia)"];
 const CATEGORIES = ["INFERRED", "INDICATED", "MEASURED"];
-const CATEGORY_BADGE = ["badge-ghost", "badge-warning", "badge-success"];
+const CATEGORY_BADGE = ["badge-ghost border-slate-700 text-slate-300", "badge-warning border-warning/30", "badge-success border-success/30"];
 
 const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
-
-  // --- formulario de registro ---
-  const [titleId, setTitleId] = useState("");
-  const [standard, setStandard] = useState(0);
-  const [category, setCategory] = useState(0);
-  const [cutOff, setCutOff] = useState("");
-  const [tonnage, setTonnage] = useState("");
-  const [geoHash, setGeoHash] = useState("");
-
-  // --- consulta de certificado ---
   const [lookupId, setLookupId] = useState("1");
 
   const { data: nextTokenId } = useScaffoldReadContract({
@@ -29,248 +18,162 @@ const Home: NextPage = () => {
     functionName: "nextTokenId",
   });
 
-  const { data: isQP } = useScaffoldReadContract({
-    contractName: "MiningRegistry",
-    functionName: "whitelistedQP",
-    args: [connectedAddress],
-  });
-
-  const { data: cert, refetch: refetchCert } = useScaffoldReadContract({
+  const { data: cert } = useScaffoldReadContract({
     contractName: "MiningRegistry",
     functionName: "getCertificate",
     args: [lookupId ? BigInt(lookupId) : undefined],
   });
 
-  const { writeContractAsync, isMining } = useScaffoldWriteContract({
-    contractName: "MiningRegistry",
-  });
-
-  const safeBig = (v: string) => {
-    try {
-      return BigInt(v || "0");
-    } catch {
-      return 0n;
-    }
-  };
-
-  const handleRegister = async () => {
-    await writeContractAsync({
-      functionName: "registerCertificate",
-      args: [titleId, standard, category, safeBig(cutOff), safeBig(tonnage), geoHash],
-    });
-    setTitleId("");
-    setCutOff("");
-    setTonnage("");
-    setGeoHash("");
-  };
-
-  const handleAdvance = async () => {
-    if (!cert) return;
-    const current = Number(cert.category);
-    if (current >= 2) return;
-    await writeContractAsync({
-      functionName: "advanceCategory",
-      args: [BigInt(lookupId), current + 1],
-    });
-    await refetchCert();
-  };
-
   const certCategory = cert ? Number(cert.category) : 0;
 
   return (
-    <div className="flex flex-col grow items-center px-5 pt-10 pb-20">
-      {/* Hero */}
-      <div className="max-w-3xl text-center">
-        <span className="badge badge-primary badge-outline mb-3">Monad testnet</span>
-        <h1 className="text-4xl font-bold mb-2">⛏️ Monad Mining Registry</h1>
-        <p className="text-lg opacity-80">
-          Expediente digital <b>inmutable</b> de títulos mineros bajo las normas{" "}
-          <b>NI 43-101</b> y <b>ECRR 2018</b>. Cada título es un NFT cuya clasificación de recurso
-          solo puede <b>avanzar</b> si la norma lo permite.
+    <div className="flex flex-col grow items-center px-4 pt-12 pb-24 bg-slate-950 text-slate-100 min-h-[85vh]">
+      {/* Hero Section */}
+      <div className="max-w-3xl text-center space-y-4 mb-12">
+        <span className="badge badge-emerald badge-outline tracking-wider text-xs uppercase px-3 py-1 font-semibold">
+          Monad Testnet
+        </span>
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
+          ⛏️ Monad Mining Registry
+        </h1>
+        <p className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          Immutable digital ledger of mining assets certified under standard compliance frameworks{" "}
+          <span className="text-emerald-400 font-semibold">NI 43-101</span> and{" "}
+          <span className="text-teal-400 font-semibold">ECRR 2018</span>.
         </p>
       </div>
 
-      {/* Estado de conexión */}
-      <div className="mt-6 flex flex-col items-center gap-2">
-        <div className="flex items-center gap-2">
-          <span className="opacity-70">Billetera:</span>
-          <Address address={connectedAddress} />
-        </div>
-        {connectedAddress &&
-          (isQP ? (
-            <span className="badge badge-success gap-1">✓ Persona Calificada (QP) autorizada</span>
-          ) : (
-            <span className="badge badge-error gap-1">✗ No autorizada para firmar</span>
-          ))}
-        <span className="text-sm opacity-60">
-          Títulos registrados: <b>{nextTokenId?.toString() ?? "…"}</b>
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10 w-full max-w-5xl">
-        {/* Registrar */}
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">📝 Registrar título minero</h2>
-            <p className="text-sm opacity-60 -mt-2">Solo una QP en lista blanca puede firmar.</p>
-
-            <label className="text-sm font-medium mt-2">ID del título</label>
-            <input
-              className="input input-bordered"
-              placeholder="Ej. CO-2024-LITIO-001"
-              value={titleId}
-              onChange={e => setTitleId(e.target.value)}
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Norma</label>
-                <select
-                  className="select select-bordered w-full"
-                  value={standard}
-                  onChange={e => setStandard(Number(e.target.value))}
-                >
-                  {STANDARDS.map((s, i) => (
-                    <option key={i} value={i}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Categoría inicial</label>
-                <select
-                  className="select select-bordered w-full"
-                  value={category}
-                  onChange={e => setCategory(Number(e.target.value))}
-                >
-                  {CATEGORIES.map((c, i) => (
-                    <option key={i} value={i}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
+      {/* Main Content Card */}
+      <div className="w-full max-w-xl space-y-6">
+        
+        {/* Certificate Verification Card */}
+        <div className="card bg-slate-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-2xl overflow-hidden shadow-emerald-950/5">
+          <div className="p-6 md:p-8 space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <span>🔎</span> Verification Portal
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Instantly lookup and verify any registered mining asset certificate by its Token ID.
+              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Ley de corte (bps)</label>
-                <input
-                  className="input input-bordered w-full"
-                  placeholder="50"
-                  value={cutOff}
-                  onChange={e => setCutOff(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Tonelaje</label>
-                <input
-                  className="input input-bordered w-full"
-                  placeholder="1000000"
-                  value={tonnage}
-                  onChange={e => setTonnage(e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">Token ID</label>
+              <input
+                className="input input-bordered w-full bg-slate-950/60 border-slate-800 rounded-xl text-sm focus:outline-none focus:border-emerald-500/50"
+                type="number"
+                min="1"
+                placeholder="Enter Token ID (e.g. 1)"
+                value={lookupId}
+                onChange={e => setLookupId(e.target.value)}
+              />
             </div>
-
-            <label className="text-sm font-medium mt-1">GeoHash del polígono</label>
-            <input
-              className="input input-bordered"
-              placeholder="d2g6f8q..."
-              value={geoHash}
-              onChange={e => setGeoHash(e.target.value)}
-            />
-
-            <button
-              className="btn btn-primary mt-3"
-              disabled={isMining || !isQP || !titleId}
-              onClick={handleRegister}
-            >
-              {isMining ? <span className="loading loading-spinner loading-sm" /> : "Registrar certificado"}
-            </button>
-            {!isQP && connectedAddress && (
-              <p className="text-xs text-error">Tu billetera no está autorizada como QP.</p>
-            )}
-          </div>
-        </div>
-
-        {/* Consultar / avanzar */}
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">🔎 Verificar título</h2>
-            <p className="text-sm opacity-60 -mt-2">Cualquiera puede verificar al instante.</p>
-
-            <label className="text-sm font-medium mt-2">Token ID</label>
-            <input
-              className="input input-bordered"
-              type="number"
-              min="1"
-              value={lookupId}
-              onChange={e => setLookupId(e.target.value)}
-            />
 
             {cert ? (
-              <div className="mt-3 space-y-2">
-                <div className="flex justify-between">
-                  <span className="opacity-60">Título</span>
-                  <b>{cert.titleId}</b>
+              <div className="bg-slate-950/60 rounded-2xl p-5 border border-slate-850 space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-slate-900">
+                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Title ID</span>
+                  <span className="text-sm font-bold text-white">{cert.titleId}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Norma</span>
-                  <span>{STANDARDS[Number(cert.standard)]}</span>
+                
+                <div className="flex justify-between items-center py-2 border-b border-slate-900">
+                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Standard</span>
+                  <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-medium">
+                    {STANDARDS[Number(cert.standard)]}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="opacity-60">Categoría</span>
-                  <span className={`badge ${CATEGORY_BADGE[certCategory]}`}>{CATEGORIES[certCategory]}</span>
+
+                <div className="flex justify-between items-center py-2 border-b border-slate-900">
+                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Resource Category</span>
+                  <span className={`badge ${CATEGORY_BADGE[certCategory]} text-xs font-bold`}>
+                    {CATEGORIES[certCategory]}
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Ley de corte (bps)</span>
-                  <span>{cert.cutOffGradeBps?.toString()}</span>
+
+                <div className="flex justify-between items-center py-2 border-b border-slate-900">
+                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Cut-off Grade</span>
+                  <span className="text-sm font-mono text-slate-200">{cert.cutOffGradeBps?.toString()} bps</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Tonelaje</span>
-                  <span>{cert.tonnage?.toString()}</span>
+
+                <div className="flex justify-between items-center py-2 border-b border-slate-900">
+                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Tonnage</span>
+                  <span className="text-sm font-mono text-slate-200">{cert.tonnage?.toString()} tons</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="opacity-60">QP firmante</span>
+
+                <div className="flex justify-between items-center py-2 border-b border-slate-900">
+                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Polygon GeoHash</span>
+                  <span className="text-xs font-mono text-slate-400">{cert.polygonGeoHash}</span>
+                </div>
+
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Signing QP</span>
                   <Address address={cert.qp} size="sm" />
                 </div>
 
-                {/* Escalera de categorías */}
-                <div className="flex items-center gap-2 justify-center mt-3">
-                  {CATEGORIES.map((c, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className={`badge ${i <= certCategory ? CATEGORY_BADGE[i] : "badge-ghost opacity-40"}`}>
-                        {c}
-                      </span>
-                      {i < 2 && <span className="opacity-40">→</span>}
-                    </div>
-                  ))}
+                {/* Visual category progress steps */}
+                <div className="pt-4 border-t border-slate-900">
+                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block text-center mb-3">
+                    CRIRSCO Classification Level
+                  </span>
+                  <div className="flex items-center gap-2 justify-center">
+                    {CATEGORIES.map((c, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all duration-300 ${
+                            i <= certCategory
+                              ? i === 0
+                                ? "bg-slate-700 text-slate-200"
+                                : i === 1
+                                ? "bg-amber-500/20 text-amber-400 border border-amber-500/20"
+                                : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
+                              : "bg-slate-950 text-slate-600 border border-slate-900 opacity-30"
+                          }`}
+                        >
+                          {c}
+                        </span>
+                        {i < 2 && <span className="text-slate-800 text-xs">→</span>}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-
-                <button
-                  className="btn btn-secondary w-full mt-2"
-                  disabled={isMining || !isQP || certCategory >= 2}
-                  onClick={handleAdvance}
-                >
-                  {certCategory >= 2
-                    ? "Categoría máxima alcanzada (MEASURED)"
-                    : `Avanzar a ${CATEGORIES[certCategory + 1]}`}
-                </button>
               </div>
             ) : (
-              <p className="text-sm opacity-50 mt-3">
-                No existe un título con ese ID (o aún no se ha registrado).
-              </p>
+              <div className="bg-slate-950/40 rounded-2xl p-6 border border-slate-850 text-center">
+                <span className="text-2xl block mb-2">🔎</span>
+                <p className="text-sm text-slate-550">
+                  No certificate exists with Token ID <b>#{lookupId}</b>.
+                </p>
+              </div>
             )}
           </div>
         </div>
+
+        {/* Info panel/Link to Dashboard */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/10 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/5">
+          <div className="text-center sm:text-left">
+            <span className="text-xs font-semibold text-slate-400 block">Are you a Qualified Person (QP)?</span>
+            <span className="text-[11px] text-slate-555">Access the QP portal to register new assets.</span>
+          </div>
+          <Link
+            href="/dashboard"
+            className="btn btn-sm btn-emerald bg-emerald-500 hover:bg-emerald-600 text-slate-950 border-none font-bold rounded-xl px-4"
+          >
+            Go to QP Dashboard →
+          </Link>
+        </div>
+
       </div>
 
-      <p className="text-xs opacity-40 mt-10">
-        Contrato verificado: 0x21d2f82d8aa4e33e55a0b60b12ce0c334c387e6d · Monad testnet
-      </p>
+      {/* Footer Meta */}
+      <div className="mt-16 text-center space-y-2">
+        <p className="text-xs text-slate-600">
+          Contract: <code className="bg-slate-900 px-1.5 py-0.5 rounded text-[11px]">0x21d2f82d8aa4e33e55a0b60b12ce0c334c387e6d</code>
+        </p>
+        <p className="text-xs text-slate-650">
+          Total registered assets count: <b>{nextTokenId?.toString() ?? "0"}</b>
+        </p>
+      </div>
     </div>
   );
 };

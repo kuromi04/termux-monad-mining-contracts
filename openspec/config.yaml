@@ -1,0 +1,63 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Tech stack: Monorepo containing NextJS frontend (React 19, TypeScript, DaisyUI, TailwindCSS) and Foundry smart contracts (Solidity).
+  Architecture: Scaffold-ETH 2 monorepo structure separating frontend (packages/nextjs) and smart contracts (packages/foundry).
+  Testing: Foundry testing framework (forge test) for smart contracts. No test runner configured for the frontend.
+  Style: Prettier & ESLint for frontend styling/linting; forge fmt & Prettier for contracts styling/linting.
+
+strict_tdd: true
+
+testing:
+  strict_tdd: true
+  detected: "2026-06-06"
+  test_runner:
+    command: "yarn foundry:test"
+    framework: "Foundry (forge)"
+  test_layers:
+    unit:
+      available: true
+      tool: "forge"
+    integration:
+      available: false
+      tool: null
+    e2e:
+      available: false
+      tool: null
+  coverage:
+    available: true
+    command: "forge coverage"
+  quality_tools:
+    linter:
+      available: true
+      command: "yarn lint"
+    type_checker:
+      available: true
+      command: "yarn next:check-types"
+    formatter:
+      available: true
+      command: "yarn format"
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Identify affected modules/packages
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group tasks by phase (infrastructure, implementation, testing)
+    - Use hierarchical numbering (1.1, 1.2, etc.)
+    - Keep tasks small enough to complete in one session
+  apply:
+    - Follow existing code patterns and conventions
+    - Load relevant coding skills for the project stack
+  verify:
+    - Run tests if test infrastructure exists
+    - Compare implementation against every spec scenario
+  archive:
+    - Warn before merging destructive deltas (large removals)
