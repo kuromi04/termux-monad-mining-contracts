@@ -1,0 +1,146 @@
+rescript = 1
+g_finger := /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/rescript-envsafe/lib/ocaml/install.stamp
+g_finger := /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/rescript-schema/lib/ocaml/install.stamp
+g_finger := /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/@rescript/react/lib/ocaml/install.stamp
+g_finger := /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/envio/lib/ocaml/install.stamp
+rule astj
+  command = /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/.pnpm/rescript@11.1.3/node_modules/rescript/linuxarm64/bsc.exe  -bs-v 11.1.3 -bs-jsx 4 -uncurried -open RescriptSchema -absname -bs-ast -o $out $i
+o src/IO.ast : astj ../../src/IO.res
+rule deps
+  command = /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/.pnpm/rescript@11.1.3/node_modules/rescript/linuxarm64/bsb_helper.exe -hash e1956717701b9adc17c7305054511aeb $in
+  restat = 1
+o src/IO.d : deps src/IO.ast
+rule mij
+  command = /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/.pnpm/rescript@11.1.3/node_modules/rescript/linuxarm64/bsc.exe -I src/bindings -I src/db -I src/eventFetching -I src/globalState -I src/ink/bindings -I src/ink/components -I src/ink -I src -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/rescript-envsafe/lib/ocaml -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/rescript-schema/lib/ocaml -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/@rescript/react/lib/ocaml -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/envio/lib/ocaml -open RescriptSchema  -bs-gentype -uncurried -bs-package-name generated -bs-package-output commonjs:$in_d:.res.js -bs-v $g_finger $i
+  dyndep = 1
+  restat = 1
+o src/IO.cmj src/IO.cmi ../../src/IO.res.js : mij src/IO.ast
+o src/Env.ast : astj ../../src/Env.res
+o src/Env.d : deps src/Env.ast
+o src/Env.cmj src/Env.cmi ../../src/Env.res.js : mij src/Env.ast
+o src/Path.ast : astj ../../src/Path.res
+o src/Path.d : deps src/Path.ast
+o src/Path.cmj src/Path.cmi ../../src/Path.res.js : mij src/Path.ast
+o src/Index.ast : astj ../../src/Index.res
+o src/Index.d : deps src/Index.ast
+o src/Index.cmj src/Index.cmi ../../src/Index.res.js : mij src/Index.ast
+o src/Types.ast : astj ../../src/Types.res
+o src/Types.d : deps src/Types.ast
+o src/Types.cmj src/Types.cmi ../../src/Types.res.js : mij src/Types.ast
+o src/Handlers.ast : astj ../../src/Handlers.res
+o src/Handlers.d : deps src/Handlers.ast
+o src/Handlers.cmj src/Handlers.cmi ../../src/Handlers.res.js : mij src/Handlers.ast
+o src/Benchmark.ast : astj ../../src/Benchmark.res
+o src/Benchmark.d : deps src/Benchmark.ast
+o src/Benchmark.cmj src/Benchmark.cmi ../../src/Benchmark.res.js : mij src/Benchmark.ast
+o src/Generated.ast : astj ../../src/Generated.res
+o src/Generated.d : deps src/Generated.ast
+o src/Generated.cmj src/Generated.cmi ../../src/Generated.res.js : mij src/Generated.ast
+o src/LoadLayer.ast : astj ../../src/LoadLayer.res
+o src/LoadLayer.d : deps src/LoadLayer.ast src/LoadLayer.iast
+o src/LoadLayer.iast : astj ../../src/LoadLayer.resi
+rule mi
+  command = /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/.pnpm/rescript@11.1.3/node_modules/rescript/linuxarm64/bsc.exe -I src/bindings -I src/db -I src/eventFetching -I src/globalState -I src/ink/bindings -I src/ink/components -I src/ink -I src -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/rescript-envsafe/lib/ocaml -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/rescript-schema/lib/ocaml -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/@rescript/react/lib/ocaml -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/envio/lib/ocaml -open RescriptSchema  -bs-gentype -uncurried -bs-v $g_finger $i
+  dyndep = 1
+  restat = 1
+o src/LoadLayer.cmi : mi src/LoadLayer.iast
+rule mj
+  command = /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/.pnpm/rescript@11.1.3/node_modules/rescript/linuxarm64/bsc.exe -bs-read-cmi -I src/bindings -I src/db -I src/eventFetching -I src/globalState -I src/ink/bindings -I src/ink/components -I src/ink -I src -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/rescript-envsafe/lib/ocaml -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/rescript-schema/lib/ocaml -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/@rescript/react/lib/ocaml -I /data/data/com.termux/files/home/Projects/monad-mining-registry/packages/indexer/generated/node_modules/envio/lib/ocaml -open RescriptSchema  -bs-gentype -uncurried -bs-package-name generated -bs-package-output commonjs:$in_d:.res.js -bs-v $g_finger $i
+  dyndep = 1
+  restat = 1
+o src/LoadLayer.cmj ../../src/LoadLayer.res.js : mj src/LoadLayer.ast src/LoadLayer.cmi
+o src/ConfigYAML.ast : astj ../../src/ConfigYAML.res
+o src/ConfigYAML.d : deps src/ConfigYAML.ast
+o src/ConfigYAML.cmj src/ConfigYAML.cmi ../../src/ConfigYAML.res.js : mij src/ConfigYAML.ast
+o src/TestHelpers.ast : astj ../../src/TestHelpers.res
+o src/TestHelpers.d : deps src/TestHelpers.ast
+o src/TestHelpers.cmj src/TestHelpers.cmi ../../src/TestHelpers.res.js : mij src/TestHelpers.ast
+o src/UserContext.ast : astj ../../src/UserContext.res
+o src/UserContext.d : deps src/UserContext.ast
+o src/UserContext.cmj src/UserContext.cmi ../../src/UserContext.res.js : mij src/UserContext.ast
+o src/PersistedState.ast : astj ../../src/PersistedState.res
+o src/PersistedState.d : deps src/PersistedState.ast
+o src/PersistedState.cmj src/PersistedState.cmi ../../src/PersistedState.res.js : mij src/PersistedState.ast
+o src/EventProcessing.ast : astj ../../src/EventProcessing.res
+o src/EventProcessing.d : deps src/EventProcessing.ast
+o src/EventProcessing.cmj src/EventProcessing.cmi ../../src/EventProcessing.res.js : mij src/EventProcessing.ast
+o src/GqlDbCustomTypes.ast : astj ../../src/GqlDbCustomTypes.res
+o src/GqlDbCustomTypes.d : deps src/GqlDbCustomTypes.ast
+o src/GqlDbCustomTypes.cmj src/GqlDbCustomTypes.cmi ../../src/GqlDbCustomTypes.res.js : mij src/GqlDbCustomTypes.ast
+o src/TestHelpers_MockDb.ast : astj ../../src/TestHelpers_MockDb.res
+o src/TestHelpers_MockDb.d : deps src/TestHelpers_MockDb.ast
+o src/TestHelpers_MockDb.cmj src/TestHelpers_MockDb.cmi ../../src/TestHelpers_MockDb.res.js : mij src/TestHelpers_MockDb.ast
+o src/TestHelpers_MockAddresses.ast : astj ../../src/TestHelpers_MockAddresses.res
+o src/TestHelpers_MockAddresses.d : deps src/TestHelpers_MockAddresses.ast
+o src/TestHelpers_MockAddresses.cmj src/TestHelpers_MockAddresses.cmi ../../src/TestHelpers_MockAddresses.res.js : mij src/TestHelpers_MockAddresses.ast
+o src/ink/EnvioInkApp.ast : astj ../../src/ink/EnvioInkApp.res
+o src/ink/EnvioInkApp.d : deps src/ink/EnvioInkApp.ast
+o src/ink/EnvioInkApp.cmj src/ink/EnvioInkApp.cmi ../../src/ink/EnvioInkApp.res.js : mij src/ink/EnvioInkApp.ast
+o src/ink/components/SyncETA.ast : astj ../../src/ink/components/SyncETA.res
+o src/ink/components/SyncETA.d : deps src/ink/components/SyncETA.ast
+o src/ink/components/SyncETA.cmj src/ink/components/SyncETA.cmi ../../src/ink/components/SyncETA.res.js : mij src/ink/components/SyncETA.ast
+o src/ink/components/Messages.ast : astj ../../src/ink/components/Messages.res
+o src/ink/components/Messages.d : deps src/ink/components/Messages.ast
+o src/ink/components/Messages.cmj src/ink/components/Messages.cmi ../../src/ink/components/Messages.res.js : mij src/ink/components/Messages.ast
+o src/ink/components/ChainData.ast : astj ../../src/ink/components/ChainData.res
+o src/ink/components/ChainData.d : deps src/ink/components/ChainData.ast
+o src/ink/components/ChainData.cmj src/ink/components/ChainData.cmi ../../src/ink/components/ChainData.res.js : mij src/ink/components/ChainData.ast
+o src/ink/components/CustomHooks.ast : astj ../../src/ink/components/CustomHooks.res
+o src/ink/components/CustomHooks.d : deps src/ink/components/CustomHooks.ast
+o src/ink/components/CustomHooks.cmj src/ink/components/CustomHooks.cmi ../../src/ink/components/CustomHooks.res.js : mij src/ink/components/CustomHooks.ast
+o src/ink/components/BufferedProgressBar.ast : astj ../../src/ink/components/BufferedProgressBar.res
+o src/ink/components/BufferedProgressBar.d : deps src/ink/components/BufferedProgressBar.ast
+o src/ink/components/BufferedProgressBar.cmj src/ink/components/BufferedProgressBar.cmi ../../src/ink/components/BufferedProgressBar.res.js : mij src/ink/components/BufferedProgressBar.ast
+o src/ink/bindings/Ink.ast : astj ../../src/ink/bindings/Ink.res
+o src/ink/bindings/Ink.d : deps src/ink/bindings/Ink.ast
+o src/ink/bindings/Ink.cmj src/ink/bindings/Ink.cmi ../../src/ink/bindings/Ink.res.js : mij src/ink/bindings/Ink.ast
+o src/ink/bindings/Style.ast : astj ../../src/ink/bindings/Style.res
+o src/ink/bindings/Style.d : deps src/ink/bindings/Style.ast
+o src/ink/bindings/Style.cmj src/ink/bindings/Style.cmi ../../src/ink/bindings/Style.res.js : mij src/ink/bindings/Style.ast
+o src/ink/bindings/DateFns.ast : astj ../../src/ink/bindings/DateFns.res
+o src/ink/bindings/DateFns.d : deps src/ink/bindings/DateFns.ast
+o src/ink/bindings/DateFns.cmj src/ink/bindings/DateFns.cmi ../../src/ink/bindings/DateFns.res.js : mij src/ink/bindings/DateFns.ast
+o src/globalState/GlobalState.ast : astj ../../src/globalState/GlobalState.res
+o src/globalState/GlobalState.d : deps src/globalState/GlobalState.ast
+o src/globalState/GlobalState.cmj src/globalState/GlobalState.cmi ../../src/globalState/GlobalState.res.js : mij src/globalState/GlobalState.ast
+o src/globalState/GlobalStateManager.ast : astj ../../src/globalState/GlobalStateManager.res
+o src/globalState/GlobalStateManager.d : deps src/globalState/GlobalStateManager.ast src/globalState/GlobalStateManager.iast
+o src/globalState/GlobalStateManager.iast : astj ../../src/globalState/GlobalStateManager.resi
+o src/globalState/GlobalStateManager.cmi : mi src/globalState/GlobalStateManager.iast
+o src/globalState/GlobalStateManager.cmj ../../src/globalState/GlobalStateManager.res.js : mj src/globalState/GlobalStateManager.ast src/globalState/GlobalStateManager.cmi
+o src/eventFetching/ChainFetcher.ast : astj ../../src/eventFetching/ChainFetcher.res
+o src/eventFetching/ChainFetcher.d : deps src/eventFetching/ChainFetcher.ast
+o src/eventFetching/ChainFetcher.cmj src/eventFetching/ChainFetcher.cmi ../../src/eventFetching/ChainFetcher.res.js : mij src/eventFetching/ChainFetcher.ast
+o src/eventFetching/ChainManager.ast : astj ../../src/eventFetching/ChainManager.res
+o src/eventFetching/ChainManager.d : deps src/eventFetching/ChainManager.ast
+o src/eventFetching/ChainManager.cmj src/eventFetching/ChainManager.cmi ../../src/eventFetching/ChainManager.res.js : mij src/eventFetching/ChainManager.ast
+o src/eventFetching/NetworkSources.ast : astj ../../src/eventFetching/NetworkSources.res
+o src/eventFetching/NetworkSources.d : deps src/eventFetching/NetworkSources.ast
+o src/eventFetching/NetworkSources.cmj src/eventFetching/NetworkSources.cmi ../../src/eventFetching/NetworkSources.res.js : mij src/eventFetching/NetworkSources.ast
+o src/db/Db.ast : astj ../../src/db/Db.res
+o src/db/Db.d : deps src/db/Db.ast
+o src/db/Db.cmj src/db/Db.cmi ../../src/db/Db.res.js : mij src/db/Db.ast
+o src/db/Enums.ast : astj ../../src/db/Enums.res
+o src/db/Enums.d : deps src/db/Enums.ast
+o src/db/Enums.cmj src/db/Enums.cmi ../../src/db/Enums.res.js : mij src/db/Enums.ast
+o src/db/Entities.ast : astj ../../src/db/Entities.res
+o src/db/Entities.d : deps src/db/Entities.ast
+o src/db/Entities.cmj src/db/Entities.cmi ../../src/db/Entities.res.js : mij src/db/Entities.ast
+o src/db/Migrations.ast : astj ../../src/db/Migrations.res
+o src/db/Migrations.d : deps src/db/Migrations.ast
+o src/db/Migrations.cmj src/db/Migrations.cmi ../../src/db/Migrations.res.js : mij src/db/Migrations.ast
+o src/db/DbFunctions.ast : astj ../../src/db/DbFunctions.res
+o src/db/DbFunctions.d : deps src/db/DbFunctions.ast
+o src/db/DbFunctions.cmj src/db/DbFunctions.cmi ../../src/db/DbFunctions.res.js : mij src/db/DbFunctions.ast
+o src/db/DbFunctionsEntities.ast : astj ../../src/db/DbFunctionsEntities.res
+o src/db/DbFunctionsEntities.d : deps src/db/DbFunctionsEntities.ast
+o src/db/DbFunctionsEntities.cmj src/db/DbFunctionsEntities.cmi ../../src/db/DbFunctionsEntities.res.js : mij src/db/DbFunctionsEntities.ast
+o src/bindings/Yargs.ast : astj ../../src/bindings/Yargs.res
+o src/bindings/Yargs.d : deps src/bindings/Yargs.ast
+o src/bindings/Yargs.cmj src/bindings/Yargs.cmi ../../src/bindings/Yargs.res.js : mij src/bindings/Yargs.ast
+o src/bindings/Dotenv.ast : astj ../../src/bindings/Dotenv.res
+o src/bindings/Dotenv.d : deps src/bindings/Dotenv.ast
+o src/bindings/Dotenv.cmj src/bindings/Dotenv.cmi ../../src/bindings/Dotenv.res.js : mij src/bindings/Dotenv.ast
+o src/bindings/RescriptMocha.ast : astj ../../src/bindings/RescriptMocha.res
+o src/bindings/RescriptMocha.d : deps src/bindings/RescriptMocha.ast
+o src/bindings/RescriptMocha.cmj src/bindings/RescriptMocha.cmi ../../src/bindings/RescriptMocha.res.js : mij src/bindings/RescriptMocha.ast

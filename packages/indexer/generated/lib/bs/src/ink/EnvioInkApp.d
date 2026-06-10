@@ -1,0 +1,1 @@
+src/ink/EnvioInkApp.cmj : src/ink/components/ChainData.cmj src/ink/components/ChainData.cmi src/Env.cmj src/Env.cmi src/ink/bindings/Ink.cmj src/ink/bindings/Ink.cmi src/ink/components/Messages.cmj src/ink/components/Messages.cmi src/ink/components/SyncETA.cmj src/ink/components/SyncETA.cmi
