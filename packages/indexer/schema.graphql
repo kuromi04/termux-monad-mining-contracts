@@ -1,0 +1,30 @@
+type QualifiedPerson {
+  id: ID!
+  address: String!
+  isWhitelisted: Boolean!
+}
+
+type Certificate {
+  id: ID!
+  tokenId: BigInt!
+  titleId: String!
+  qp: String!
+  currentCategory: Int!
+  reserveCategory: Int!
+  updatedAt: BigInt!
+}
+
+type CategoryChange {
+  id: ID!
+  tokenId: BigInt!
+  from: Int!
+  to: Int!
+  timestamp: BigInt!
+}
+
+type ReserveDeclaration {
+  id: ID!
+  tokenId: BigInt!
+  reserveCategory: Int!
+  timestamp: BigInt!
+}

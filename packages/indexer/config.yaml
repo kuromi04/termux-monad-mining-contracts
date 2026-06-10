@@ -1,0 +1,15 @@
+name: MonadMiningRegistry
+networks:
+  - id: 10143
+    start_block: 1
+    rpc_config:
+      url: "https://testnet-rpc.monad.xyz"
+    contracts:
+      - name: MiningRegistry
+        address: ["0x21d2f82d8aa4e33e55a0b60b12ce0c334c387e6d"]
+        handler: src/EventHandlers.ts
+        events:
+          - event: QPWhitelisted(address qp)
+          - event: CertificateRegistered(uint256 indexed tokenId, address indexed qp, string titleId)
+          - event: CategoryAdvanced(uint256 indexed tokenId, uint8 from, uint8 to)
+          - event: ReservesDeclared(uint256 indexed tokenId, uint8 reserveCategory)

@@ -1,0 +1,1 @@
+import { createRequire } from 'module'; const require = createRequire(import.meta.url); try { const native = require('./node_modules/@envio-dev/hyperfuel-client-linux-arm64-gnu/hyperfuel-client.linux-arm64-gnu.node'); console.log('Successfully loaded native module'); } catch (e) { console.error('Failed to load:', e); }

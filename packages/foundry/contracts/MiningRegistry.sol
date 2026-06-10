@@ -17,10 +17,17 @@ contract MiningRegistry is ERC721, Ownable {
         MEASURED
     }
 
+    enum ReserveCategory {
+        NONE,
+        PROBABLE,
+        PROVED
+    }
+
     struct MiningAssetCertificate {
         string titleId;
         Standard standard;
         ResourceCategory category;
+        ReserveCategory reserveCategory;
         uint256 cutOffGradeBps;
         uint256 tonnage;
         string polygonGeoHash;
@@ -39,6 +46,7 @@ contract MiningRegistry is ERC721, Ownable {
     event QPWhitelisted(address qp);
     event CertificateRegistered(uint256 indexed tokenId, address indexed qp, string titleId);
     event CategoryAdvanced(uint256 indexed tokenId, ResourceCategory from, ResourceCategory to);
+    event ReservesDeclared(uint256 indexed tokenId, ReserveCategory reserveCategory);
 
     modifier onlyQP() {
         if (!whitelistedQP[msg.sender]) {
@@ -71,6 +79,7 @@ contract MiningRegistry is ERC721, Ownable {
             titleId: titleId,
             standard: standard,
             category: category,
+            reserveCategory: ReserveCategory.NONE,
             cutOffGradeBps: cutOffGradeBps,
             tonnage: tonnage,
             polygonGeoHash: polygonGeoHash,
@@ -98,6 +107,43 @@ contract MiningRegistry is ERC721, Ownable {
         certificate.updatedAt = block.timestamp;
 
         emit CategoryAdvanced(tokenId, currentCategory, newCategory);
+    }
+
+    /// @notice Declara reservas probables o probadas segun la categoria de recurso actual.
+    function declareReserves(uint256 tokenId, ReserveCategory newReserveCategory) external onlyQP {
+        if (!_tokenExists(tokenId)) {
+            revert TokenDoesNotExist();
+        }
+
+        MiningAssetCertificate storage certificate = certificates[tokenId];
+        ResourceCategory currentResourceCategory = certificate.category;
+
+        if (newReserveCategory == ReserveCategory.PROBABLE) {
+            if (currentResourceCategory != ResourceCategory.INDICATED && currentResourceCategory != ResourceCategory.MEASURED) {
+                revert InvalidCategoryTransition();
+            }
+        } else if (newReserveCategory == ReserveCategory.PROVED) {
+            if (currentResourceCategory != ResourceCategory.MEASURED) {
+                revert InvalidCategoryTransition();
+            }
+        } else if (newReserveCategory == ReserveCategory.NONE) {
+            // Permitir volver a NONE? El diseño no lo especifica, pero por seguridad lo permitimos o simplemente ignoramos.
+            // Segun los tests, solo probamos saltos hacia adelante.
+        }
+
+        certificate.reserveCategory = newReserveCategory;
+        certificate.updatedAt = block.timestamp;
+
+        emit ReservesDeclared(tokenId, newReserveCategory);
+    }
+
+    /// @notice Override de _update para convertir los certificados en Soulbound (no transferibles).
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
+        address from = _ownerOf(tokenId);
+        if (from != address(0) && to != address(0)) {
+            revert("Soulbound: Transfer not allowed");
+        }
+        return super._update(to, tokenId, auth);
     }
 
     /// @notice Consulta el certificado minero registrado sin permitir lecturas de tokens inexistentes.

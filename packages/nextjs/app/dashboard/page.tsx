@@ -1,20 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { Address, AddressInput, Balance } from "~~/components/scaffold-eth";
-import { useScaffoldReadContract, useScaffoldWriteContract, useScaffoldContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldContract, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 const STANDARDS = ["NI 43-101 (Canadá)", "ECRR 2018 (Colombia)"];
 const CATEGORIES = ["INFERRED", "INDICATED", "MEASURED"];
-const CATEGORY_BADGE = ["badge-ghost", "badge-warning", "badge-success"];
+const RESERVE_CATEGORIES = ["NONE", "PROBABLE", "PROVED"];
 
 interface Certificate {
   tokenId: number;
   titleId: string;
   standard: number;
   category: number;
+  reserveCategory: number;
   cutOffGradeBps: bigint;
   tonnage: bigint;
   polygonGeoHash: string;
@@ -85,6 +87,7 @@ const Dashboard: NextPage = () => {
               titleId: cert.titleId,
               standard: Number(cert.standard),
               category: Number(cert.category),
+              reserveCategory: Number(cert.reserveCategory),
               cutOffGradeBps: cert.cutOffGradeBps,
               tonnage: cert.tonnage,
               polygonGeoHash: cert.polygonGeoHash,
@@ -92,7 +95,7 @@ const Dashboard: NextPage = () => {
               updatedAt: cert.updatedAt,
             });
           }
-        } catch (e) {
+        } catch {
           // Gracefully skip tokens that do not exist or reverted
         }
       }
@@ -158,6 +161,19 @@ const Dashboard: NextPage = () => {
     }
   };
 
+  const handleDeclareReserves = async (tokenId: number, newReserveCategory: number) => {
+    try {
+      await writeContractAsync({
+        functionName: "declareReserves",
+        args: [BigInt(tokenId), newReserveCategory],
+      });
+      await refetchNextTokenId();
+      setRefreshTrigger(prev => prev + 1);
+    } catch (e) {
+      console.error("Error declaring reserves:", e);
+    }
+  };
+
   const handleWhitelist = async () => {
     if (!isAdminValid) return;
     try {
@@ -187,18 +203,19 @@ const Dashboard: NextPage = () => {
           </div>
           <h2 className="text-2xl font-bold text-red-400 mb-2">Access Denied</h2>
           <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-            Your wallet address is not authorized in the Mining Registry. You must be a whitelisted Qualified Person (QP) or the contract Owner to access this dashboard.
+            Your wallet address is not authorized in the Mining Registry. You must be a whitelisted Qualified Person
+            (QP) or the contract Owner to access this dashboard.
           </p>
           <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800 text-left mb-6">
             <span className="text-xs text-slate-500 block mb-1">Your Wallet Address</span>
             <Address address={connectedAddress} />
           </div>
-          <a
+          <Link
             href="/"
             className="btn btn-outline border-red-500/40 text-red-400 hover:bg-red-500 hover:text-white rounded-full w-full transition-all duration-300"
           >
             Return to Home
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -225,16 +242,13 @@ const Dashboard: NextPage = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 px-4 py-8 md:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-900 pb-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">
               <span className="text-3xl">🛡️</span> QP Dashboard
             </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Authorized interface for resource registry & categorization.
-            </p>
+            <p className="text-slate-400 text-sm mt-1">Authorized interface for resource registry & categorization.</p>
           </div>
           <div className="flex items-center gap-2 bg-slate-900/50 backdrop-blur-md px-4 py-2 rounded-full border border-slate-800/80">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -244,10 +258,8 @@ const Dashboard: NextPage = () => {
 
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Left Column: Profile Card + Admin Panel */}
           <div className="lg:col-span-1 space-y-8">
-            
             {/* Whitelist Status Profile Card */}
             {isQP && (
               <div className="card bg-slate-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-2xl overflow-hidden shadow-emerald-950/10">
@@ -282,8 +294,12 @@ const Dashboard: NextPage = () => {
                       <span className="text-2xl block mb-1">📋</span>
                       <span className="text-xs text-slate-400 block mb-1">Standards</span>
                       <div className="flex flex-col gap-1 justify-center items-center">
-                        <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">NI 43-101</span>
-                        <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">ECRR 2018</span>
+                        <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">
+                          NI 43-101
+                        </span>
+                        <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">
+                          ECRR 2018
+                        </span>
                       </div>
                     </div>
                     <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-850 text-center flex flex-col justify-center items-center">
@@ -307,22 +323,17 @@ const Dashboard: NextPage = () => {
                   <h3 className="font-bold text-blue-400 flex items-center gap-2">
                     <span>⚙️</span> Owner Administration
                   </h3>
-                  <span className="badge badge-info text-xs font-semibold py-1">
-                    CONTRACT OWNER
-                  </span>
+                  <span className="badge badge-info text-xs font-semibold py-1">CONTRACT OWNER</span>
                 </div>
                 <div className="p-6 space-y-4">
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Whitelist a new Qualified Person (QP) to grant them certificate registration and advancement permissions.
+                    Whitelist a new Qualified Person (QP) to grant them certificate registration and advancement
+                    permissions.
                   </p>
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-slate-300">QP Wallet Address</label>
-                    <AddressInput
-                      value={newQPAddress}
-                      placeholder="0x..."
-                      onChange={val => setNewQPAddress(val)}
-                    />
+                    <AddressInput value={newQPAddress} placeholder="0x..." onChange={val => setNewQPAddress(val)} />
                   </div>
 
                   <div className="space-y-1.5">
@@ -345,11 +356,7 @@ const Dashboard: NextPage = () => {
                     disabled={isMining || !isAdminValid}
                     onClick={handleWhitelist}
                   >
-                    {isMining ? (
-                      <span className="loading loading-spinner loading-sm" />
-                    ) : (
-                      "Whitelist QP"
-                    )}
+                    {isMining ? <span className="loading loading-spinner loading-sm" /> : "Whitelist QP"}
                   </button>
                 </div>
               </div>
@@ -367,7 +374,6 @@ const Dashboard: NextPage = () => {
                   <span className="text-xs text-slate-500">Creates an immutable NFT record</span>
                 </div>
                 <div className="p-6 space-y-6">
-                  
                   {/* Grid fields */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1.5">
@@ -381,7 +387,9 @@ const Dashboard: NextPage = () => {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Polygon GeoHash</label>
+                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Polygon GeoHash
+                      </label>
                       <input
                         className="input input-bordered w-full bg-slate-950/60 border-slate-800 rounded-xl text-sm focus:outline-none focus:border-emerald-500/50"
                         placeholder="e.g. d2g6f8q9b"
@@ -408,7 +416,9 @@ const Dashboard: NextPage = () => {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Initial Category</label>
+                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Initial Category
+                      </label>
                       <select
                         className="select select-bordered w-full bg-slate-950/60 border-slate-800 rounded-xl text-sm focus:outline-none focus:border-emerald-500/50"
                         value={category}
@@ -425,7 +435,9 @@ const Dashboard: NextPage = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Cut-off Grade (bps)</label>
+                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Cut-off Grade (bps)
+                      </label>
                       <input
                         type="number"
                         min="0"
@@ -437,7 +449,9 @@ const Dashboard: NextPage = () => {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Tonnage (tons)</label>
+                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Tonnage (tons)
+                      </label>
                       <input
                         type="number"
                         min="1"
@@ -454,11 +468,7 @@ const Dashboard: NextPage = () => {
                     disabled={isMining || !isFormValid}
                     onClick={handleRegister}
                   >
-                    {isMining ? (
-                      <span className="loading loading-spinner loading-sm" />
-                    ) : (
-                      "Sign & Register Certificate"
-                    )}
+                    {isMining ? <span className="loading loading-spinner loading-sm" /> : "Sign & Register Certificate"}
                   </button>
                 </div>
               </div>
@@ -467,7 +477,8 @@ const Dashboard: NextPage = () => {
                 <span className="text-4xl mb-3">🛠️</span>
                 <h3 className="text-xl font-bold text-slate-300">Contract Owner Dashboard</h3>
                 <p className="text-sm text-slate-400 mt-2 max-w-md">
-                  You are connected as the contract owner. You can use the whitelist panel on the left to authorize QPs. Registering certificates requires a whitelisted QP role.
+                  You are connected as the contract owner. You can use the whitelist panel on the left to authorize QPs.
+                  Registering certificates requires a whitelisted QP role.
                 </p>
               </div>
             )}
@@ -483,7 +494,7 @@ const Dashboard: NextPage = () => {
               </h3>
               <span className="text-xs text-slate-500">Manage category upgrades for your signed certificates</span>
             </div>
-            
+
             <div className="p-6">
               {isLoadingCerts ? (
                 <div className="flex flex-col items-center justify-center py-12 space-y-3">
@@ -503,15 +514,16 @@ const Dashboard: NextPage = () => {
                         <th className="py-3 px-4 font-bold">Token ID</th>
                         <th className="py-3 px-4 font-bold">Title ID</th>
                         <th className="py-3 px-4 font-bold">Standard</th>
-                        <th className="py-3 px-4 font-bold">Cut-off (bps)</th>
-                        <th className="py-3 px-4 font-bold">Tonnage</th>
-                        <th className="py-3 px-4 font-bold">GeoHash</th>
-                        <th className="py-3 px-4 font-bold text-center">Category Steps</th>
+                        <th className="py-3 px-4 font-bold text-center">Resources / Reserves</th>
                         <th className="py-3 px-4 font-bold text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-900">
                       {qpCerts.map(cert => {
+                        const canDeclareProbable =
+                          cert.reserveCategory === 0 && (cert.category === 1 || cert.category === 2);
+                        const canDeclareProved = cert.reserveCategory < 2 && cert.category === 2;
+
                         return (
                           <tr key={cert.tokenId} className="hover:bg-slate-900/50 transition-colors">
                             <td className="py-4 px-4 font-semibold text-emerald-400">#{cert.tokenId}</td>
@@ -521,51 +533,88 @@ const Dashboard: NextPage = () => {
                                 {cert.standard === 0 ? "NI 43-101" : "ECRR 2018"}
                               </span>
                             </td>
-                            <td className="py-4 px-4 text-slate-300">{cert.cutOffGradeBps.toString()}</td>
-                            <td className="py-4 px-4 text-slate-300">{cert.tonnage.toString()}</td>
-                            <td className="py-4 px-4 font-mono text-xs text-slate-400">{cert.polygonGeoHash}</td>
-                            
-                            {/* Category Escalator Steps */}
+
+                            {/* Combined Category & Reserves Display */}
                             <td className="py-4 px-4">
-                              <div className="flex items-center gap-1.5 justify-center">
-                                {CATEGORIES.map((catName, idx) => (
-                                  <div key={idx} className="flex items-center gap-1">
+                              <div className="flex flex-col gap-2 items-center">
+                                {/* Resource Escalator Steps */}
+                                <div className="flex items-center gap-1.5 justify-center">
+                                  {CATEGORIES.map((catName, idx) => (
+                                    <div key={idx} className="flex items-center gap-1">
+                                      <span
+                                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                          idx <= cert.category
+                                            ? idx === 0
+                                              ? "bg-slate-700 text-slate-200"
+                                              : idx === 1
+                                                ? "bg-amber-500/20 text-amber-400 border border-amber-500/20"
+                                                : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
+                                            : "bg-slate-950 text-slate-600 border border-slate-900"
+                                        }`}
+                                      >
+                                        {catName}
+                                      </span>
+                                      {idx < 2 && <span className="text-slate-700 text-xs">→</span>}
+                                    </div>
+                                  ))}
+                                </div>
+                                {/* Reserve Badges */}
+                                <div className="flex gap-2">
+                                  {cert.reserveCategory > 0 && (
                                     <span
-                                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                                        idx <= cert.category
-                                          ? idx === 0
-                                            ? "bg-slate-700 text-slate-200"
-                                            : idx === 1
-                                            ? "bg-amber-500/20 text-amber-400 border border-amber-500/20"
-                                            : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
-                                          : "bg-slate-950 text-slate-600 border border-slate-900"
+                                      className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${
+                                        cert.reserveCategory === 1
+                                          ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                                          : "bg-purple-500/20 text-purple-400 border border-purple-500/30 shadow-[0_0_8px_rgba(168,85,247,0.2)]"
                                       }`}
                                     >
-                                      {catName}
+                                      {RESERVE_CATEGORIES[cert.reserveCategory]} RESERVE
                                     </span>
-                                    {idx < 2 && <span className="text-slate-700 text-xs">→</span>}
-                                  </div>
-                                ))}
+                                  )}
+                                  <span className="text-[9px] font-bold px-2 py-0.5 rounded uppercase bg-slate-800 text-slate-400 border border-slate-700">
+                                    Soulbound
+                                  </span>
+                                </div>
                               </div>
                             </td>
 
-                            {/* Action Button */}
+                            {/* Action Buttons */}
                             <td className="py-4 px-4 text-right">
-                              {cert.category >= 2 ? (
-                                <span className="text-xs text-emerald-500 font-semibold">✓ Max Level</span>
-                              ) : (
-                                <button
-                                  className="btn btn-xs btn-outline border-amber-500/30 text-amber-400 hover:bg-amber-500 hover:text-slate-950 transition-all rounded"
-                                  disabled={isMining}
-                                  onClick={() => handleAdvance(cert.tokenId, cert.category)}
-                                >
-                                  {isMining ? (
-                                    <span className="loading loading-spinner loading-xs" />
-                                  ) : (
-                                    `Escalate to ${CATEGORIES[cert.category + 1]}`
-                                  )}
-                                </button>
-                              )}
+                              <div className="flex flex-col gap-1 items-end">
+                                {cert.category < 2 && (
+                                  <button
+                                    className="btn btn-xs btn-outline border-amber-500/30 text-amber-400 hover:bg-amber-500 hover:text-slate-950 transition-all rounded w-full max-w-[140px]"
+                                    disabled={isMining}
+                                    onClick={() => handleAdvance(cert.tokenId, cert.category)}
+                                  >
+                                    Escalate to {CATEGORIES[cert.category + 1]}
+                                  </button>
+                                )}
+
+                                {canDeclareProbable && (
+                                  <button
+                                    className="btn btn-xs btn-outline border-blue-500/30 text-blue-400 hover:bg-blue-500 hover:text-white transition-all rounded w-full max-w-[140px]"
+                                    disabled={isMining}
+                                    onClick={() => handleDeclareReserves(cert.tokenId, 1)}
+                                  >
+                                    Declare PROBABLE
+                                  </button>
+                                )}
+
+                                {canDeclareProved && (
+                                  <button
+                                    className="btn btn-xs btn-outline border-purple-500/30 text-purple-400 hover:bg-purple-500 hover:text-white transition-all rounded w-full max-w-[140px]"
+                                    disabled={isMining}
+                                    onClick={() => handleDeclareReserves(cert.tokenId, 2)}
+                                  >
+                                    Declare PROVED
+                                  </button>
+                                )}
+
+                                {cert.category >= 2 && cert.reserveCategory >= 2 && (
+                                  <span className="text-xs text-emerald-500 font-semibold">✓ Fully Certified</span>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );

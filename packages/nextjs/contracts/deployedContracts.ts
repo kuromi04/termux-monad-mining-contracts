@@ -102,6 +102,11 @@ const deployedContracts = {
               internalType: "enum MiningRegistry.ResourceCategory",
             },
             {
+              name: "reserveCategory",
+              type: "uint8",
+              internalType: "enum MiningRegistry.ReserveCategory",
+            },
+            {
               name: "cutOffGradeBps",
               type: "uint256",
               internalType: "uint256",
@@ -128,6 +133,24 @@ const deployedContracts = {
             },
           ],
           stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "declareReserves",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "newReserveCategory",
+              type: "uint8",
+              internalType: "enum MiningRegistry.ReserveCategory",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
         },
         {
           type: "function",
@@ -178,6 +201,11 @@ const deployedContracts = {
                   name: "category",
                   type: "uint8",
                   internalType: "enum MiningRegistry.ResourceCategory",
+                },
+                {
+                  name: "reserveCategory",
+                  type: "uint8",
+                  internalType: "enum MiningRegistry.ReserveCategory",
                 },
                 {
                   name: "cutOffGradeBps",
@@ -664,6 +692,25 @@ const deployedContracts = {
         },
         {
           type: "event",
+          name: "ReservesDeclared",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "reserveCategory",
+              type: "uint8",
+              indexed: false,
+              internalType: "enum MiningRegistry.ReserveCategory",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
           name: "Transfer",
           inputs: [
             {
@@ -834,14 +881,14 @@ const deployedContracts = {
     },
   },
   31337: {
-    YourContract: {
+    MiningRegistry: {
       address: "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35",
       abi: [
         {
           type: "constructor",
           inputs: [
             {
-              name: "_owner",
+              name: "initialOwner",
               type: "address",
               internalType: "address",
             },
@@ -849,18 +896,268 @@ const deployedContracts = {
           stateMutability: "nonpayable",
         },
         {
-          type: "receive",
-          stateMutability: "payable",
+          type: "function",
+          name: "advanceCategory",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "newCategory",
+              type: "uint8",
+              internalType: "enum MiningRegistry.ResourceCategory",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
         },
         {
           type: "function",
-          name: "greeting",
+          name: "approve",
+          inputs: [
+            {
+              name: "to",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "balanceOf",
+          inputs: [
+            {
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "certificates",
+          inputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "titleId",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "standard",
+              type: "uint8",
+              internalType: "enum MiningRegistry.Standard",
+            },
+            {
+              name: "category",
+              type: "uint8",
+              internalType: "enum MiningRegistry.ResourceCategory",
+            },
+            {
+              name: "reserveCategory",
+              type: "uint8",
+              internalType: "enum MiningRegistry.ReserveCategory",
+            },
+            {
+              name: "cutOffGradeBps",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "tonnage",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "polygonGeoHash",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "qp",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "updatedAt",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "declareReserves",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "newReserveCategory",
+              type: "uint8",
+              internalType: "enum MiningRegistry.ReserveCategory",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "getApproved",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getCertificate",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple",
+              internalType: "struct MiningRegistry.MiningAssetCertificate",
+              components: [
+                {
+                  name: "titleId",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "standard",
+                  type: "uint8",
+                  internalType: "enum MiningRegistry.Standard",
+                },
+                {
+                  name: "category",
+                  type: "uint8",
+                  internalType: "enum MiningRegistry.ResourceCategory",
+                },
+                {
+                  name: "reserveCategory",
+                  type: "uint8",
+                  internalType: "enum MiningRegistry.ReserveCategory",
+                },
+                {
+                  name: "cutOffGradeBps",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "tonnage",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "polygonGeoHash",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "qp",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "updatedAt",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+              ],
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "isApprovedForAll",
+          inputs: [
+            {
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "operator",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "name",
           inputs: [],
           outputs: [
             {
               name: "",
               type: "string",
               internalType: "string",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "nextTokenId",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
           stateMutability: "view",
@@ -880,103 +1177,581 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "premium",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "setGreeting",
+          name: "ownerOf",
           inputs: [
             {
-              name: "_newGreeting",
-              type: "string",
-              internalType: "string",
-            },
-          ],
-          outputs: [],
-          stateMutability: "payable",
-        },
-        {
-          type: "function",
-          name: "totalCounter",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
+              name: "tokenId",
               type: "uint256",
               internalType: "uint256",
             },
           ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "userGreetingCounter",
-          inputs: [
+          outputs: [
             {
               name: "",
               type: "address",
               internalType: "address",
             },
           ],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
           stateMutability: "view",
         },
         {
           type: "function",
-          name: "withdraw",
+          name: "registerCertificate",
+          inputs: [
+            {
+              name: "titleId",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "standard",
+              type: "uint8",
+              internalType: "enum MiningRegistry.Standard",
+            },
+            {
+              name: "category",
+              type: "uint8",
+              internalType: "enum MiningRegistry.ResourceCategory",
+            },
+            {
+              name: "cutOffGradeBps",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "tonnage",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "polygonGeoHash",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          outputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "renounceOwnership",
           inputs: [],
           outputs: [],
           stateMutability: "nonpayable",
         },
         {
-          type: "event",
-          name: "GreetingChange",
+          type: "function",
+          name: "safeTransferFrom",
           inputs: [
             {
-              name: "greetingSetter",
+              name: "from",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "to",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "safeTransferFrom",
+          inputs: [
+            {
+              name: "from",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "to",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "data",
+              type: "bytes",
+              internalType: "bytes",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "setApprovalForAll",
+          inputs: [
+            {
+              name: "operator",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "approved",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "supportsInterface",
+          inputs: [
+            {
+              name: "interfaceId",
+              type: "bytes4",
+              internalType: "bytes4",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "symbol",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "tokenURI",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "transferFrom",
+          inputs: [
+            {
+              name: "from",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "to",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "transferOwnership",
+          inputs: [
+            {
+              name: "newOwner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "whitelistQP",
+          inputs: [
+            {
+              name: "qp",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "whitelistedQP",
+          inputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "event",
+          name: "Approval",
+          inputs: [
+            {
+              name: "owner",
               type: "address",
               indexed: true,
               internalType: "address",
             },
             {
-              name: "newGreeting",
-              type: "string",
-              indexed: false,
-              internalType: "string",
+              name: "approved",
+              type: "address",
+              indexed: true,
+              internalType: "address",
             },
             {
-              name: "premium",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
-            {
-              name: "value",
+              name: "tokenId",
               type: "uint256",
-              indexed: false,
+              indexed: true,
               internalType: "uint256",
             },
           ],
           anonymous: false,
         },
+        {
+          type: "event",
+          name: "ApprovalForAll",
+          inputs: [
+            {
+              name: "owner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "operator",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "approved",
+              type: "bool",
+              indexed: false,
+              internalType: "bool",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "CategoryAdvanced",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "from",
+              type: "uint8",
+              indexed: false,
+              internalType: "enum MiningRegistry.ResourceCategory",
+            },
+            {
+              name: "to",
+              type: "uint8",
+              indexed: false,
+              internalType: "enum MiningRegistry.ResourceCategory",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "CertificateRegistered",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "qp",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "titleId",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "OwnershipTransferred",
+          inputs: [
+            {
+              name: "previousOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "newOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "QPWhitelisted",
+          inputs: [
+            {
+              name: "qp",
+              type: "address",
+              indexed: false,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "ReservesDeclared",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "reserveCategory",
+              type: "uint8",
+              indexed: false,
+              internalType: "enum MiningRegistry.ReserveCategory",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Transfer",
+          inputs: [
+            {
+              name: "from",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "to",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "tokenId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "ERC721IncorrectOwner",
+          inputs: [
+            {
+              name: "sender",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ERC721InsufficientApproval",
+          inputs: [
+            {
+              name: "operator",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ERC721InvalidApprover",
+          inputs: [
+            {
+              name: "approver",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ERC721InvalidOperator",
+          inputs: [
+            {
+              name: "operator",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ERC721InvalidOwner",
+          inputs: [
+            {
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ERC721InvalidReceiver",
+          inputs: [
+            {
+              name: "receiver",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ERC721InvalidSender",
+          inputs: [
+            {
+              name: "sender",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ERC721NonexistentToken",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "InvalidCategoryTransition",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "NotQualifiedPerson",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "OwnableInvalidOwner",
+          inputs: [
+            {
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "OwnableUnauthorizedAccount",
+          inputs: [
+            {
+              name: "account",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "TokenDoesNotExist",
+          inputs: [],
+        },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1780728840037.json",
+      deploymentFile: "run-1780788897187.json",
       deploymentScript: "Deploy.s.sol",
     },
   },

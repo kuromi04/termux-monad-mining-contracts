@@ -1,14 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import type { NextPage } from "next";
 import Link from "next/link";
+import type { NextPage } from "next";
 import { Address } from "~~/components/scaffold-eth";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useCertificateHistory } from "~~/hooks/useCertificateHistory";
 
 const STANDARDS = ["NI 43-101 (Canadá)", "ECRR 2018 (Colombia)"];
 const CATEGORIES = ["INFERRED", "INDICATED", "MEASURED"];
-const CATEGORY_BADGE = ["badge-ghost border-slate-700 text-slate-300", "badge-warning border-warning/30", "badge-success border-success/30"];
+const RESERVE_CATEGORIES = ["NONE", "PROBABLE", "PROVED"];
+const CATEGORY_BADGE = [
+  "badge-ghost border-slate-700 text-slate-300",
+  "badge-warning border-warning/30",
+  "badge-success border-success/30",
+];
 
 const Home: NextPage = () => {
   const [lookupId, setLookupId] = useState("1");
@@ -24,7 +30,10 @@ const Home: NextPage = () => {
     args: [lookupId ? BigInt(lookupId) : undefined],
   });
 
+  const { data: historyData, fetching: fetchingHistory } = useCertificateHistory(lookupId);
+
   const certCategory = cert ? Number(cert.category) : 0;
+  const reserveCategory = cert ? Number(cert.reserveCategory) : 0;
 
   return (
     <div className="flex flex-col grow items-center px-4 pt-12 pb-24 bg-slate-950 text-slate-100 min-h-[85vh]">
@@ -33,9 +42,7 @@ const Home: NextPage = () => {
         <span className="badge badge-emerald badge-outline tracking-wider text-xs uppercase px-3 py-1 font-semibold">
           Monad Testnet
         </span>
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-          ⛏️ Monad Mining Registry
-        </h1>
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">⛏️ Monad Mining Registry</h1>
         <p className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
           Immutable digital ledger of mining assets certified under standard compliance frameworks{" "}
           <span className="text-emerald-400 font-semibold">NI 43-101</span> and{" "}
@@ -45,7 +52,6 @@ const Home: NextPage = () => {
 
       {/* Main Content Card */}
       <div className="w-full max-w-xl space-y-6">
-        
         {/* Certificate Verification Card */}
         <div className="card bg-slate-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-2xl overflow-hidden shadow-emerald-950/5">
           <div className="p-6 md:p-8 space-y-6">
@@ -76,7 +82,7 @@ const Home: NextPage = () => {
                   <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Title ID</span>
                   <span className="text-sm font-bold text-white">{cert.titleId}</span>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-2 border-b border-slate-900">
                   <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Standard</span>
                   <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-medium">
@@ -85,11 +91,24 @@ const Home: NextPage = () => {
                 </div>
 
                 <div className="flex justify-between items-center py-2 border-b border-slate-900">
-                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Resource Category</span>
+                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">
+                    Resource Category
+                  </span>
                   <span className={`badge ${CATEGORY_BADGE[certCategory]} text-xs font-bold`}>
                     {CATEGORIES[certCategory]}
                   </span>
                 </div>
+
+                {reserveCategory > 0 && (
+                  <div className="flex justify-between items-center py-2 border-b border-slate-900">
+                    <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">
+                      Declared Reserves
+                    </span>
+                    <span className="badge badge-accent badge-outline text-[10px] font-bold">
+                      {RESERVE_CATEGORIES[reserveCategory]}
+                    </span>
+                  </div>
+                )}
 
                 <div className="flex justify-between items-center py-2 border-b border-slate-900">
                   <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Cut-off Grade</span>
@@ -111,6 +130,59 @@ const Home: NextPage = () => {
                   <Address address={cert.qp} size="sm" />
                 </div>
 
+                {/* Audit Trail Section */}
+                <div className="pt-6 mt-4 border-t border-slate-900 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <span className="text-sm">📜</span> Historical Audit Trail
+                    </h3>
+                    {fetchingHistory && <span className="loading loading-spinner loading-xs text-slate-500"></span>}
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* Category Changes */}
+                    {historyData?.CategoryChange &&
+                      historyData.CategoryChange.map((log: any) => (
+                        <div key={log.id} className="flex gap-3 relative">
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center z-10">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[11px] font-bold text-slate-200">
+                              Advanced to {CATEGORIES[Number(log.to)]}
+                            </span>
+                            <span className="text-[10px] text-slate-500">
+                              {new Date(Number(log.timestamp) * 1000).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+
+                    {/* Reserve Declarations */}
+                    {historyData?.ReserveDeclaration &&
+                      historyData.ReserveDeclaration.map((log: any) => (
+                        <div key={log.id} className="flex gap-3 relative">
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center z-10">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[11px] font-bold text-slate-200">
+                              Declared {RESERVE_CATEGORIES[Number(log.reserveCategory)]} Reserve
+                            </span>
+                            <span className="text-[10px] text-slate-500">
+                              {new Date(Number(log.timestamp) * 1000).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+
+                    {(!historyData?.CategoryChange || historyData.CategoryChange.length === 0) &&
+                      (!historyData?.ReserveDeclaration || historyData.ReserveDeclaration.length === 0) && (
+                        <p className="text-[10px] text-slate-600 italic">No history recorded in the indexer yet.</p>
+                      )}
+                  </div>
+                </div>
+
                 {/* Visual category progress steps */}
                 <div className="pt-4 border-t border-slate-900">
                   <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block text-center mb-3">
@@ -125,8 +197,8 @@ const Home: NextPage = () => {
                               ? i === 0
                                 ? "bg-slate-700 text-slate-200"
                                 : i === 1
-                                ? "bg-amber-500/20 text-amber-400 border border-amber-500/20"
-                                : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
+                                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/20"
+                                  : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
                               : "bg-slate-950 text-slate-600 border border-slate-900 opacity-30"
                           }`}
                         >
@@ -162,13 +234,15 @@ const Home: NextPage = () => {
             Go to QP Dashboard →
           </Link>
         </div>
-
       </div>
 
       {/* Footer Meta */}
       <div className="mt-16 text-center space-y-2">
         <p className="text-xs text-slate-600">
-          Contract: <code className="bg-slate-900 px-1.5 py-0.5 rounded text-[11px]">0x21d2f82d8aa4e33e55a0b60b12ce0c334c387e6d</code>
+          Contract:{" "}
+          <code className="bg-slate-900 px-1.5 py-0.5 rounded text-[11px]">
+            0x21d2f82d8aa4e33e55a0b60b12ce0c334c387e6d
+          </code>
         </p>
         <p className="text-xs text-slate-650">
           Total registered assets count: <b>{nextTokenId?.toString() ?? "0"}</b>

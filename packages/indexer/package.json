@@ -1,0 +1,13 @@
+{
+  "name": "monad-mining-registry-indexer",
+  "version": "0.1.0",
+  "scripts": {
+    "codegen": "envio codegen",
+    "dev": "envio dev"
+  },
+  "dependencies": {
+    "abitype": "^1.0.6",
+    "envio": "^3.1.2",
+    "viem": "^2.21.0"
+  }
+}

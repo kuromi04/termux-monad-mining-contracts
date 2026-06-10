@@ -80,18 +80,13 @@ contract MiningRegistryTest is Test {
         miningRegistry.advanceCategory(tokenId, MiningRegistry.ResourceCategory.INFERRED);
     }
 
-    function _registerCertificate(
-        string memory titleId,
-        MiningRegistry.ResourceCategory category
-    ) private returns (uint256 tokenId) {
+    function _registerCertificate(string memory titleId, MiningRegistry.ResourceCategory category)
+        private
+        returns (uint256 tokenId)
+    {
         vm.prank(qp);
         tokenId = miningRegistry.registerCertificate(
-            titleId,
-            MiningRegistry.Standard.ECRR_2018,
-            category,
-            50,
-            1_000_000,
-            "dr5ru6j2"
+            titleId, MiningRegistry.Standard.ECRR_2018, category, 50, 1_000_000, "dr5ru6j2"
         );
     }
 }
